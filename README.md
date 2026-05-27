@@ -4,7 +4,7 @@
 
 Levlr is a personal skill tracking web app that lets you log daily practice sessions, visualise your growth over time, and get AI-powered feedback on your progress.
 
-**Live:** [levlr-phi.vercel.app](https://levlr-phi.vercel.app)
+**Live:** [levlr-phi.vercel.app](https://levlr2-0.vercel.app/)
 
 ---
 
