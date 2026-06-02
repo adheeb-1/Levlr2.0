@@ -562,7 +562,8 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
     const cache = await loadCache(activeSkillId);
     const sessionCount = sessions.length;
 
-    if (cache?.summaryText && cache.summarySessionCount === sessionCount) {
+    const cachedTextOk = cache?.summaryText && !cache.summaryText.includes('Unable to generate') && !cache.summaryText.includes('Could not generate');
+    if (cachedTextOk && cache.summarySessionCount === sessionCount) {
       // Show cached — no API call
       content.innerHTML = `
         <div class="cache-badge">✓ cached · ${sessionCount} sessions</div>
@@ -598,18 +599,22 @@ Be specific — reference their actual words. Raw and real, not generic coach ta
         body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 1000 })
       });
       const data = await response.json();
-      const text = data.choices?.[0]?.message?.content || 'Unable to generate summary. Keep logging.';
-      const html = text.replace(/\n/g, '<br/>');
+      const text = data.choices?.[0]?.message?.content;
 
-      loading.style.display = 'none';
+      if (!text) {
+        await saveCache(activeSkillId, null);
+        content.innerHTML = '<p style="font-size:13px;color:var(--cream-dim);">Could not generate summary right now. Try again in a moment.</p>';
+        return;
+      }
+
+      const html = text.replace(/\n/g, '<br/>');
       content.innerHTML = `<div class="ai-summary-text done">${html}</div>`;
 
-      // Save to cache
+      // Save to cache only on success
       await saveCache(activeSkillId, { summaryText: html, summarySessionCount: sessionCount });
 
     } catch(e) {
-      loading.style.display = 'none';
-      content.innerHTML = '<p style="font-size:13px;color:var(--cream-dim);">Could not generate summary right now. Keep logging.</p>';
+      content.innerHTML = '<p style="font-size:13px;color:var(--cream-dim);">Could not generate summary right now. Try again in a moment.</p>';
     }
   }
 
