@@ -571,9 +571,10 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
     }
 
     // No cache or session count changed — generate
-    loading.style.display = 'flex';
-    content.innerHTML = '';
-    content.appendChild(loading);
+    content.innerHTML = `<div class="ai-loading" id="ai-loading" style="display:flex;">
+      <div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div>
+      <span>Analysing your sessions...</span>
+    </div>`;
 
     try {
       const sessionSummary = sessions.map((s, i) => `Session ${i+1}: Did: ${s.did} | Learned: ${s.learned} | Created: ${s.created}`).join('\n');
