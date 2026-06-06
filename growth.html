@@ -562,8 +562,7 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
     const cache = await loadCache(activeSkillId);
     const sessionCount = sessions.length;
 
-    const cachedTextOk = cache?.summaryText && !cache.summaryText.includes('Unable to generate') && !cache.summaryText.includes('Could not generate');
-    if (cachedTextOk && cache.summarySessionCount === sessionCount) {
+    if (cache?.summaryText && cache.summarySessionCount === sessionCount) {
       // Show cached — no API call
       content.innerHTML = `
         <div class="cache-badge">✓ cached · ${sessionCount} sessions</div>
@@ -572,10 +571,9 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
     }
 
     // No cache or session count changed — generate
-    content.innerHTML = `<div class="ai-loading" id="ai-loading" style="display:flex;">
-      <div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div>
-      <span>Analysing your sessions...</span>
-    </div>`;
+    loading.style.display = 'flex';
+    content.innerHTML = '';
+    content.appendChild(loading);
 
     try {
       const sessionSummary = sessions.map((s, i) => `Session ${i+1}: Did: ${s.did} | Learned: ${s.learned} | Created: ${s.created}`).join('\n');
@@ -599,22 +597,18 @@ Be specific — reference their actual words. Raw and real, not generic coach ta
         body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 1000 })
       });
       const data = await response.json();
-      const text = data.choices?.[0]?.message?.content;
-
-      if (!text) {
-        await saveCache(activeSkillId, null);
-        content.innerHTML = '<p style="font-size:13px;color:var(--cream-dim);">Could not generate summary right now. Try again in a moment.</p>';
-        return;
-      }
-
+      const text = data.choices?.[0]?.message?.content || 'Unable to generate summary. Keep logging.';
       const html = text.replace(/\n/g, '<br/>');
+
+      loading.style.display = 'none';
       content.innerHTML = `<div class="ai-summary-text done">${html}</div>`;
 
-      // Save to cache only on success
+      // Save to cache
       await saveCache(activeSkillId, { summaryText: html, summarySessionCount: sessionCount });
 
     } catch(e) {
-      content.innerHTML = '<p style="font-size:13px;color:var(--cream-dim);">Could not generate summary right now. Try again in a moment.</p>';
+      loading.style.display = 'none';
+      content.innerHTML = '<p style="font-size:13px;color:var(--cream-dim);">Could not generate summary right now. Keep logging.</p>';
     }
   }
 
