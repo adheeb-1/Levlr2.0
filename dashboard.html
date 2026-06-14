@@ -1682,6 +1682,15 @@ canvas { animation: chartFade 0.8s ease 0.3s both; }
         document.getElementById('notif-prompt-modal').style.display = 'flex';
       }, 2000);
     }
+
+    // Notification reminder button state + checkAndNotify — moved here so currentUser is guaranteed
+    if (Notification.permission === 'granted') {
+      const btn = document.getElementById('reminder-btn');
+      if (btn) { btn.textContent = '🔔 Reminders On'; btn.style.opacity = '0.5'; btn.onclick = null; }
+    }
+    if (localStorage.getItem('levlr_reminders') === 'on' && Notification.permission === 'granted') {
+      checkAndNotify();
+    }
   });
 
   function setGreeting() {
@@ -2223,15 +2232,7 @@ document.addEventListener('click', (e) => {
     }
   };
 
-  window.addEventListener('load', () => {
-    if (localStorage.getItem('levlr_reminders') === 'on' && Notification.permission === 'granted') {
-      checkAndNotify();
-    }
-    if (Notification.permission === 'granted') {
-      const btn = document.getElementById('reminder-btn');
-      if (btn) { btn.textContent = '🔔 Reminders On'; btn.style.opacity = '0.5'; btn.onclick = null; }
-    }
-  });
+  // (notification load logic moved inside onAuthStateChanged above)
 </script>
 <div id="notif-prompt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:3000;align-items:center;justify-content:center;">
   <div style="background:var(--card);border:1px solid var(--border);padding:36px;width:90%;max-width:400px;border-radius:4px;text-align:center;">
