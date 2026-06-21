@@ -414,7 +414,10 @@ body::before { content:''; position:fixed; inset:0; background:repeating-linear-
     try {
       const snap = await getDoc(getCacheRef(year, month));
       return snap.exists() ? snap.data() : null;
-    } catch(e) { return null; }
+    } catch(e) {
+      console.error('Cache load failed:', e);
+      return null;
+    }
   }
 
   async function saveCache(year, month, data) {
