@@ -383,7 +383,8 @@ body::before { content:''; position:fixed; inset:0; background:repeating-linear-
     appId: "1:952558891162:web:ab7ede91149c65b069ef23"
   };
 
-  const GROQ_KEY = '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';
+  // Groq calls now go through /api/groq (Vercel serverless function) —
+  // the API key lives server-side as an env var, never shipped to the browser.
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -723,9 +724,9 @@ Rules:
 - "Focus for next month" must be one clear, actionable thing — not a lecture.
 - Write like a sharp coach, not a motivational poster.`;
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const response = await fetch('/api/groq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 1500 })
       });
       const data = await response.json();
