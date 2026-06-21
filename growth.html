@@ -375,7 +375,8 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
   setPersistence(auth, browserLocalPersistence);
   const db = getFirestore(app);
 
-  const GROQ_KEY = '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';
+  // Groq calls now go through /api/groq (Vercel serverless function) —
+  // the API key lives server-side as an env var, never shipped to the browser.
 
   let currentUser = null;
   let allSessions = [];
@@ -395,7 +396,10 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
     try {
       const snap = await getDoc(getCacheDocRef(skillId));
       return snap.exists() ? snap.data() : null;
-    } catch(e) { return null; }
+    } catch(e) {
+      console.error('Cache load failed:', e);
+      return null;
+    }
   }
 
   async function saveCache(skillId, data) {
@@ -591,9 +595,9 @@ Write a 3-paragraph growth summary:
 
 Be specific — reference their actual words. Raw and real, not generic coach talk. Under 200 words total.`;
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const response = await fetch('/api/groq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 1000 })
       });
       const data = await response.json();
@@ -669,9 +673,9 @@ Be specific — reference their actual words. Raw and real, not generic coach ta
       : `You are a skill coach. The user is tracking: "${skillName}". Return ONLY a JSON array of exactly 5 resources to help them improve. Each object must have: "type" (e.g. Book, YouTube, Tool, Community, Course, Podcast), "name" (resource name), "description" (one punchy sentence on why it helps). Mix types — include at least one YouTube, one Book, one Tool or Community. No markdown, no explanation, just the raw JSON array.`;
 
     try {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const response = await fetch('/api/groq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 700 })
       });
       const data = await response.json();
