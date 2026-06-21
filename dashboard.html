@@ -2096,9 +2096,9 @@ Give feedback in 3 short parts (no headers, just flowing text):
 
 Keep it under 120 words. Raw, real, not motivational-poster energy.`;
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const response = await fetch('/api/groq', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+  headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 1000
   })
